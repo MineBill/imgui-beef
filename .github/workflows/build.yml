@@ -259,15 +259,42 @@ jobs:
           
           COMMIT_ID=$(git rev-parse HEAD)
           echo "::set-output name=commit-id::$COMMIT_ID"
-      
+
       - name: Create tag
-        uses: simpleactions/create-tag@v1.0.0
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const github = require('@actions/github');
+            const tag = '${{ needs.compare-tags.outputs.new-tag }}';
+            const sha = '${{ steps.merge-all.outputs.commit-id }}';
+            const message = '';
+  
+            github.rest.git.createTag({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag: tag,
+              message: message,
+              object: sha,
+              type: 'commit'
+            });
+  
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/${tag}`,
+              sha: sha
+            });
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          sha: ${{ steps.merge-all.outputs.commit-id }}
-          tag: ${{ needs.compare-tags.outputs.new-tag }}
-          message: ""
+      
+      # - name: Create tag
+      #   uses: simpleactions/create-tag@v1.0.0
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     sha: ${{ steps.merge-all.outputs.commit-id }}
+      #     tag: ${{ needs.compare-tags.outputs.new-tag }}
+      #     message: ""
 
   cleanup:
     runs-on: ubuntu-latest
