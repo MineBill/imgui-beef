@@ -29,7 +29,7 @@ namespace ImGuiBeefGenerator.ImGui
 
         public static string FixType(string type)
         {
-            if (type.Contains("_") && !IsFunctionPointer(type) && !type.EndsWith("_t") && !type.EndsWith("_t*"))
+            if (type.Contains("_") && !IsFunctionPointer(type) && !type.EndsWith("_t") && !type.EndsWith("_t*") && !type.Contains("STB"))
                 return FixTemplate(type);
 
             var fixedType = type;
@@ -81,7 +81,7 @@ namespace ImGuiBeefGenerator.ImGui
                 newTemplate += "<";
                 fixedTemplate = newTemplate + FixType(fixedTemplate.Substring(fixedTemplate.IndexOf('_') + 1));
             }
-            
+
             if (fixedTemplate.EndsWith("Ptr"))
             {
                 fixedTemplate = fixedTemplate.Remove(fixedTemplate.Length - 3, 3);

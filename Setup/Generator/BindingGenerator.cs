@@ -4,6 +4,7 @@ using System.IO;
 using System;
 using Utf8Json;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace ImGuiBeefGenerator
@@ -44,140 +45,141 @@ namespace ImGuiBeefGenerator
 
 			var files = new Dictionary<string, string>();
 
-			var imguiFile = "";
+            var file = new StringBuilder();
 			if (includeGenerationInfo)
 			{
-				imguiFile +=
-$@"// -- GENERATION INFORMATION --
-// Date: {DateTime.Now}
-// Constructors: {Constructors}
-// Destructors: {Destructors}
-// Enums: {Bindings.Count(b => b is ImGuiEnum)}
-// Global methods: {Bindings.Count(b => b is ImGuiGlobalMethodDefinition)}
-// Instance methods: {InstanceMethods}
-// Structs: {Bindings.Count(b => b is ImGuiStruct)}
-// Typedefs: {Bindings.Count(b => b is ImGuiTypeDef)}
+				var info =
+                    $"""
+                     // -- GENERATION INFORMATION --
+                     // Date: {DateTime.Now}
+                     // Constructors: {Constructors}
+                     // Destructors: {Destructors}
+                     // Enums: {Bindings.Count(b => b is ImGuiEnum)}
+                     // Global methods: {Bindings.Count(b => b is ImGuiGlobalMethodDefinition)}
+                     // Instance methods: {InstanceMethods}
+                     // Structs: {Bindings.Count(b => b is ImGuiStruct)}
+                     // Typedefs: {Bindings.Count(b => b is ImGuiTypeDef)}
 
-";
-			}
+                     """;
+                file.Append(info);
+            }
 
 			string secondLine = File.ReadLines("Generator/cimgui/cimgui.h").ElementAt(1);
 			Regex pattern = new Regex(@"\d+(\.\d+)+");
 			Match match = pattern.Match(secondLine);
 			string version = match.Value;
 
-			imguiFile +=
-$@"using System;
+			var text =
+                $$"""
+                using System;
 
-namespace ImGui
-{{
-	public static class ImGui
-    {{
-		public static char8* VERSION = ""{version}"";
-		public static int VERSION_NUM = {version.Replace(".", "")}00;
-		public static bool CHECKVERSION()
-		{{
-			bool result = DebugCheckVersionAndDataLayout(VERSION, sizeof(IO), sizeof(Style), sizeof(Vec2), sizeof(Vec4), sizeof(DrawVert), sizeof(DrawIdx));
-			Runtime.Assert(result);
-			return result;
-		}}
+                namespace ImGui;
+                public static class ImGui
+                {
+                    public static char8* VERSION = "{{version}}";
+                    public static int VERSION_NUM = {{version.Replace(".", "")}}00;
+                    public static bool CHECKVERSION()
+                    {
+                        bool result = DebugCheckVersionAndDataLayout(VERSION, sizeof(IO), sizeof(Style), sizeof(Vec2), sizeof(Vec4), sizeof(DrawVert), sizeof(DrawIdx));
+                        Runtime.Assert(result);
+                        return result;
+                    }
 
-		public static mixin ASSERT(bool condition) {{ Runtime.Assert(condition); }}
-		public static mixin ASSERT(bool condition, String errorMsg) {{ Runtime.Assert(condition, errorMsg); }}
+                    public static mixin ASSERT(bool condition) { Runtime.Assert(condition); }
+                    public static mixin ASSERT(bool condition, String errorMsg) { Runtime.Assert(condition, errorMsg); }
 
-		public static DrawCallback* DrawCallback_ResetRenderState = (.)(void*)-1;
+                    public static DrawCallback* DrawCallback_ResetRenderState = (.)(void*)-1;
 
+                    [CRepr]
+                    public struct FILE
+                    {
+                        void* _Placeholder;
+                    }
 
+                    [CRepr]
+                    public enum DockRequestType
+                    {
+                        None,
+                        Dock,
+                        Undock,
+                        Split
+                    }
 
-        [CRepr]
-        public struct FILE
-        {{
-            void* _Placeholder;
-        }}
+                    [CRepr]
+                    public struct DockRequest
+                    {
+                        DockRequestType Type;
+                        Window* DockTargetWindow;
+                        DockNode* DockTargetNode;
+                        Window* DockPayload;
+                        Dir DockSplitDir;
+                        float DockSplitRatio;
+                        bool DockSplitOuter;
+                        Window* UndockTargetWindow;
+                        DockNode* UndockTargetNode;
+                    }
 
-        [CRepr]
-		public enum DockRequestType
-		{{
-		    None,
-		    Dock,
-		    Undock,
-		    Split
-		}}
+                    [CRepr]
+                    public struct DockNodeSettings
+                    {
+                        ID             ID;
+                        ID             ParentNodeId;
+                        ID             ParentWindowId;
+                        ID             SelectedWindowId;
+                        char           SplitAxis;
+                        char           Depth;
+                        DockNodeFlags  Flags;
+                        Vec2ih         Pos;
+                        Vec2ih         Size;
+                        Vec2ih         SizeRef;
+                    }
 
-		[CRepr]
-		public struct DockRequest
-		{{
-		    DockRequestType Type;
-		    Window* DockTargetWindow;
-		    DockNode* DockTargetNode;
-		    Window* DockPayload;
-		    Dir DockSplitDir;
-		    float DockSplitRatio;
-		    bool DockSplitOuter;
-		    Window* UndockTargetWindow;
-		    DockNode* UndockTargetNode;
-		}}
+                    [CRepr]
+                    public struct DockPreviewData
+                    {
+                        DockNode FutureNode;
+                        bool IsDropAllowed;
+                        bool IsCenterAvailable;
+                        bool IsSidesAvailable;
+                        bool IsSplitDirExplicit;
+                        DockNode* SplitNode;
+                        Dir SplitDir;
+                        float SplitRatio;
+                        Rect[(.) Dir.COUNT] DropRectsDraw;
+                    }
 
-		[CRepr]
-		public struct DockNodeSettings
-		{{
-		    ID             ID;
-		    ID             ParentNodeId;
-		    ID             ParentWindowId;
-		    ID             SelectedWindowId;
-		    char         SplitAxis;
-		    char                Depth;
-		    DockNodeFlags  Flags;
-		    Vec2ih            Pos;
-		    Vec2ih            Size;
-		    Vec2ih            SizeRef;
-		}}
+                    public static void FullscreenDockspace()
+                    {
+                        var viewport = ImGui.GetMainViewport();
+                        ImGui.SetNextWindowPos(viewport.Pos);
+                        ImGui.SetNextWindowSize(viewport.Size);
+                        ImGui.SetNextWindowViewport(viewport.ID);
 
-		[CRepr]
-		public struct DockPreviewData
-		{{
-		    DockNode FutureNode;
-		    bool IsDropAllowed;
-		    bool IsCenterAvailable;
-		    bool IsSidesAvailable;
-		    bool IsSplitDirExplicit;
-		    DockNode* SplitNode;
-		    Dir SplitDir;
-		    float SplitRatio;
-		    Rect[(.) Dir.COUNT] DropRectsDraw;
-		}}
+                        ImGui.PushStyleVar(.WindowPadding, .(0, 0));
+                        ImGui.PushStyleVar(.WindowRounding, 0.0f);
+                        ImGui.PushStyleVar(.WindowBorderSize, 0.0f);
+                        ImGui.WindowFlags windowFlags = .MenuBar | .NoDocking | .NoTitleBar | .NoResize | .NoMove | .NoBringToFrontOnFocus | .NoNavFocus;
+                        ImGui.Begin("MainDockspaceWindow", null, windowFlags);
+                        ImGui.PopStyleVar(3);
 
-		public static void FullscreenDockspace()
-		{{
-			var viewport = ImGui.GetMainViewport();
-			ImGui.SetNextWindowPos(viewport.Pos);
-			ImGui.SetNextWindowSize(viewport.Size);
-			ImGui.SetNextWindowViewport(viewport.ID);
+                        ImGui.ID dockspaceId = ImGui.GetID("MainDockspace");
+                        ImGui.DockSpace(dockspaceId);
+                        ImGui.End();
+                    }
 
-			ImGui.PushStyleVar(.WindowPadding, .(0, 0));
-			ImGui.PushStyleVar(.WindowRounding, 0.0f);
-			ImGui.PushStyleVar(.WindowBorderSize, 0.0f);
-			ImGui.WindowFlags windowFlags = .MenuBar | .NoDocking | .NoTitleBar | .NoResize | .NoMove | .NoBringToFrontOnFocus | .NoNavFocus;
-			ImGui.Begin(""MainDockspaceWindow"", null, windowFlags);
-			ImGui.PopStyleVar(3);
+                    // -- Auto-Generated --
 
-			ImGui.ID dockspaceId = ImGui.GetID(""MainDockspace"");
-			ImGui.DockSpace(dockspaceId);
-			ImGui.End();
-		}}
+                """;
 
-        // -- Auto-Generated --
+            file.Append(text);
+            foreach (var binding in Bindings.Where(b => !(b is ImGuiImplStruct)))
+            {
+                file.Append($"    {binding.Serialize()}\n");
+            }
 
-        ";
+            file.Append('}');
 
-			foreach (var binding in Bindings.Where(b => !(b is ImGuiImplStruct)))
-				imguiFile += binding.Serialize().Replace("\n", "\n        ");
-
-			imguiFile = imguiFile.Remove(imguiFile.Length - 4);
-			imguiFile += "}\n}";
-
-			files.Add("src/ImGui.Gen.bf", imguiFile);
-
+			files.Add("src/ImGui.Gen.bf", file.ToString());
 
 			files["ImGuiImplGlfw/src/ImGuiImplGlfw.bf"] = GenerateImplFile("ImGuiImplGlfw", Bindings);
 			files["ImGuiImplOpenGL2/src/ImGuiImplOpenGL2.bf"] = GenerateImplFile("ImGuiImplOpenGL2", Bindings);

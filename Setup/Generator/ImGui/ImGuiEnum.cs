@@ -59,15 +59,16 @@ namespace ImGuiBeefGenerator.ImGui
         public string Serialize()
         {
             var serialized =
-$@"
-[AllowDuplicates]
-public enum {Name} : int32
-{{
-";
+                $$"""
+                  [AllowDuplicates]
+                  public enum {{Name}} : int32
+                  {
+
+                  """;
 
             foreach (var enumValue in Values)
             {
-                serialized += 
+                serialized +=
                     $"    {(char.IsDigit(enumValue.Key[0]) ? "N" : "")}{enumValue.Key} = {enumValue.Value},\n";
             }
 

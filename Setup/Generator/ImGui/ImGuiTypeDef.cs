@@ -10,6 +10,8 @@ namespace ImGuiBeefGenerator.ImGui
         public ImGuiTypeDef(string name, string value)
         {
             Name = name;
+            if (value == "Stb::STB_TexteditState")
+                value = "STB_TexteditState";
             Value = value;
         }
 

@@ -166,52 +166,64 @@ namespace ImGuiBeefGenerator.ImGui
                 definition = $"{Name}{(IsGeneric ? "<T>" : "")}";
 
             var serialized =
-$@"
-[CRepr]
-public struct {definition}
-{{";
+                $$"""
+
+                  [CRepr]
+                  public struct {{definition}}
+                  {
+                  """;
             if (Name == "BitArray")
             {
-                serialized += 
-@"
-    public U32[(BitCount + 32) >> 5] Storage;
-";
+                serialized +=
+                    """
+                    
+                        public U32[(BitCount + 32) >> 5] Storage;
+
+                    """;
             }
             else if (Name == "Span")
             {
                 serialized +=
-@"
-    public T* Data;
-    public T* DataEnd;
-";
+                    """
+                    
+                        public T* Data;
+                        public T* DataEnd;
+
+                    """;
             }
             else if (Name == "SpanAllocator")
             {
                 serialized +=
-@"
-    public charPtr BasePtr;
-    int32 CurrOff;
-    int32 CurrIdx;
-    int32[T] Offsets;
-    int32[T] Sizes;
-";
+                    """
+                    
+                        public charPtr BasePtr;
+                        int32 CurrOff;
+                        int32 CurrIdx;
+                        int32[T] Offsets;
+                        int32[T] Sizes;
+
+                    """;
             }
             else if (Name == "Pool")
             {
                 serialized +=
-@"
-    public Vector<T> Buf;
-    public Storage Map;
-    public PoolIdx FreeIdx;
-    public PoolIdx AliveCount;
-";
+                    """
+                    
+                        public Vector<T> Buf;
+                        public Storage Map;
+                        public PoolIdx FreeIdx;
+                        public PoolIdx AliveCount;
+
+                    """;
             }
             else if (Name == "ChunkStream")
             {
-                serialized += 
-@"
-    public Vector<char> Buf;
-";
+                serialized +=
+                    """
+                    
+                        public Vector<char> Buf;
+
+                    """;
             }
             else
             {
