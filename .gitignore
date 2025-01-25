@@ -3,6 +3,7 @@
 bin/
 obj/
 **/.idea/
+build/
 
 cimgui/
 dist/
@@ -10,6 +11,7 @@ dist/
 
 Setup/Generator/Properties/
 Setup/build/
+**/*DotSettings.user
 
 imgui.ini
 BeefSpace.toml
