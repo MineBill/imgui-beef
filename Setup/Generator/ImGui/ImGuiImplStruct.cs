@@ -38,7 +38,7 @@ namespace ImGuiBeefGenerator.ImGui
 
         public string Serialize()
         {
-            var serialized = 
+            var serialized =
 $@"
 public static class {Name}
 {{";
@@ -69,6 +69,13 @@ public static class {Name}
     private typealias SDL_Window = SDL2.SDL.Window;
     private typealias SDL_Event = SDL2.SDL.Event;
     private typealias SDL_Renderer = SDL2.SDL.Renderer;
+
+    [CRepr]
+    public enum GamepadMode {
+        AutoFirst,
+        AutoAll,
+        Manual
+    }
 ";
             }
 
