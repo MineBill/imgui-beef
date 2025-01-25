@@ -1,0 +1,19 @@
+# Visual Studio
+.vs/
+bin/
+obj/
+**/.idea/
+
+cimgui/
+dist/
+**/lib/
+
+Setup/Generator/Properties/
+Setup/build/
+
+imgui.ini
+BeefSpace.toml
+BeefSpace_User.toml
+recovery/
+example/build
+example/pkg
