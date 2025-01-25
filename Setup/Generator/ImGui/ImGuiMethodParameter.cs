@@ -106,8 +106,8 @@ namespace ImGuiBeefGenerator.ImGui
                 {
                     var argStrSplit = argStr.Split(' ');
                     var type = argStrSplit[0];
-                    var name = argStrSplit[1];
-                    paramList.Add(new ImGuiMethodParameter(name, type));
+                    var name = argStrSplit.ElementAtOrDefault(1);
+                    paramList.Add(new ImGuiMethodParameter(name ?? string.Empty, type));
                 }
             }
 
@@ -162,24 +162,24 @@ namespace ImGuiBeefGenerator.ImGui
 
         public string ToCallArg()
         {
-            if (Name == "self")
-                return "&this";
-            else if (Name == "pOut")
-                return "&pOut";
-            if (IsVaList)
-                return "scope String()..AppendF(StringView(fmt), params args)";
-            else
-                return $"{((IsOutParam || IsRefParam) && !IsArrayParam ? "&" : "")}{Name}";
+            return Name switch
+            {
+                "self" => "&this",
+                "pOut" => "&pOut",
+                _ => IsVaList
+                    ? "scope String()..AppendF(StringView(fmt), params args)"
+                    : $"{((IsOutParam || IsRefParam) && !IsArrayParam ? "&" : "")}{Name}"
+            };
         }
 
         public string ToLinkableDefinitionArg()
         {
             if (IsVaList)
                 return "...";
-            else if (Name == "self")
+            if (Name == "self")
                 return "Self* self";
-            else
-                return $"{Type} {Name}";
+            var @fixed = ImGui.RemovePrefix(Type.Trim());
+            return $"{@fixed} {Name}";
         }
 
         public string ToDefinitionArg()

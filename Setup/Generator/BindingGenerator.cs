@@ -61,7 +61,7 @@ $@"// -- GENERATION INFORMATION --
 ";
 			}
 
-			string secondLine = File.ReadLines("../cimgui/cimgui.h").ElementAt(1);
+			string secondLine = File.ReadLines("Generator/cimgui/cimgui.h").ElementAt(1);
 			Regex pattern = new Regex(@"\d+(\.\d+)+");
 			Match match = pattern.Match(secondLine);
 			string version = match.Value;
@@ -71,24 +71,6 @@ $@"using System;
 
 namespace ImGui
 {{
-    public extension ImGui
-    {{
-        public extension Vec2
-        {{
-            public readonly static Vec2 Zero = .(0, 0);
-            public readonly static Vec2 Ones = .(1, 1);
-            public readonly static Vec2 OneZero = .(1, 0);
-            public readonly static Vec2 ZeroOne = .(0, 1);
-            public readonly static Vec2 NOneZero = .(-1, 0);
-        }}
-
-        public extension Vec4
-        {{
-            public readonly static Vec4 Zero = .(0, 0, 0, 0);
-            public readonly static Vec4 Ones = .(1, 1, 1, 1);
-        }}
-    }}
-
 	public static class ImGui
     {{
 		public static char8* VERSION = ""{version}"";
@@ -105,12 +87,7 @@ namespace ImGui
 
 		public static DrawCallback* DrawCallback_ResetRenderState = (.)(void*)-1;
 
-        typealias char = char8;
-        typealias uchar = uint8;
-        typealias ushort = uint16;
-        typealias short = int16;
-        typealias size = uint64;
-        typealias charPtr = char8*;
+
 
         [CRepr]
         public struct FILE
@@ -199,7 +176,7 @@ namespace ImGui
 			imguiFile = imguiFile.Remove(imguiFile.Length - 4);
 			imguiFile += "}\n}";
 
-			files.Add("src/ImGui.bf", imguiFile);
+			files.Add("src/ImGui.Gen.bf", imguiFile);
 
 
 			files["ImGuiImplGlfw/src/ImGuiImplGlfw.bf"] = GenerateImplFile("ImGuiImplGlfw", Bindings);
