@@ -3,3 +3,7 @@ FileVersion = 1
 [Project]
 Name = "Setup"
 StartupObject = "Setup.Program"
+
+[Configs.Debug.Win64]
+CLibType = "Dynamic"
+BeefLibType = "Static"

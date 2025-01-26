@@ -55,6 +55,16 @@ namespace ImGuiBeefGenerator.ImGui
             var argsT = (IEnumerable<dynamic>) variation["argsT"];
             if ("ImBitArray" == (string) variation["stname"])
                 Console.WriteLine("");
+            if (variation.ContainsKey("constructor"))
+            {
+                return new ImGuiConstructorDefinition(
+                    (string) variation["ov_cimguiname"],
+                    (List<object>) variation["argsT"],
+                    (string) variation["stname"],
+                    variation.ContainsKey("templated"),
+                    defaults
+                );
+            }
             if ((argsT.Count() > 0 && argsT.Any(arg => arg["name"] == "self" && arg["type"] == $"{variation["stname"]}*")) || ((string) variation["ov_cimguiname"]).StartsWith("ImGui_Impl"))
             {
                 return new ImGuiInstanceMethodDefinition(
@@ -67,17 +77,7 @@ namespace ImGuiBeefGenerator.ImGui
                     defaults
                 );
             }
-            else if (variation.ContainsKey("constructor"))
-            {
-                return new ImGuiConstructorDefinition(
-                    (string) variation["ov_cimguiname"],
-                    (List<object>) variation["argsT"],
-                    (string) variation["stname"],
-                    variation.ContainsKey("templated"),
-                    defaults
-                );
-            }
-            else if ((string) variation["stname"] == "" && variation["ov_cimguiname"].ToString().StartsWith("ig"))
+            if ((string) variation["stname"] == "" && variation["ov_cimguiname"].ToString().StartsWith("ig"))
             {
                 return new ImGuiGlobalMethodDefinition(
                     (string) variation["funcname"],

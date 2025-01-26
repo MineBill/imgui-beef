@@ -4,6 +4,7 @@ bin/
 obj/
 **/.idea/
 build/
+**/cmake-build/
 
 cimgui/
 dist/

@@ -1,8 +1,8 @@
 // -- GENERATION INFORMATION --
-// Date: 1/25/2025 10:46:00 PM
+// Date: 1/26/2025 10:17:58 AM
 // Constructors: 104
 // Destructors: 83
-// Enums: 82
+// Enums: 81
 // Global methods: 941
 // Instance methods: 374
 // Structs: 122
@@ -120,19 +120,19 @@ public static class ImGui
 
     public typealias ID = uint32;
 
-    public typealias InputTextCallback = function int (InputTextCallbackData* data);
+    public typealias InputTextCallback = function int     (InputTextCallbackData* data);
 
     public typealias KeyChord = int32;
 
     public typealias KeyRoutingIndex = S16;
 
-    public typealias MemAllocFunc = function void* (size sz, void* user_data);
+    public typealias MemAllocFunc = function void*   (size sz, void* user_data);
 
-    public typealias MemFreeFunc = function void (void* ptr, void* user_data);
+    public typealias MemFreeFunc = function void    (void* ptr, void* user_data);
 
     public typealias SelectionUserData = S64;
 
-    public typealias SizeCallback = function void (SizeCallbackData* data);
+    public typealias SizeCallback = function void    (SizeCallbackData* data);
 
     public typealias TableColumnIdx = S16;
 
@@ -144,7 +144,7 @@ public static class ImGui
 
     public typealias S32 = int32;
 
-    public typealias S64 = int64;
+    public typealias S64 =   int64;
 
     public typealias S8 = char;
 
@@ -615,22 +615,6 @@ public enum FocusedFlags : int32
     NoPopupHierarchy = 8,
     DockHierarchy = 16,
     RootAndChildWindows = 3,
-
-}
-
-    [AllowDuplicates]
-public enum FreeTypeBuilderFlags : int32
-{
-    NoHinting = 1,
-    NoAutoHint = 2,
-    ForceAutoHint = 4,
-    LightHinting = 8,
-    MonoHinting = 16,
-    Bold = 32,
-    Oblique = 64,
-    Monochrome = 128,
-    LoadColor = 256,
-    Bitmap = 512,
 
 }
 
