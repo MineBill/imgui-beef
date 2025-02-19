@@ -26,13 +26,23 @@ namespace ImGuiBeefGenerator.ImGui
                 Type = "params Object[]";
                 IsVaList = true;
             }
+            else if (type == "ImGui_ImplVulkan_InitInfo*")
+            {
+                Name = name;
+                Type = "InitInfo*";
+            }
+            else if (type.Contains("PFN_vkVoidFunction"))
+            {
+                Name = "loader_func";
+                Type = "function void(char8* function_name, void* user_data)";
+            }
             else
             {
                 Name = name;
                 Type = ImGui.FixType(type);
                 IsVaList = false;
 
-                if (defaultValue == "NULL")
+                if (defaultValue is "NULL" or "nullptr")
                 {
                     DefaultValue = "null";
                 }

@@ -15,7 +15,6 @@ Setup/build/
 **/*DotSettings.user
 
 imgui.ini
-BeefSpace.toml
 BeefSpace_User.toml
 recovery/
 example/build

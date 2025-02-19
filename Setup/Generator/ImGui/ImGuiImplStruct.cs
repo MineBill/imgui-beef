@@ -51,6 +51,42 @@ public static class {Name}
     private typealias GLFWmonitor = GLFW.GlfwMonitor;
 ";
             }
+            else if (Name.StartsWith("ImGuiImplVulkan"))
+            {
+                serialized +=
+@"
+    private typealias DrawData = ImGui.DrawData;
+    private typealias VkDescriptorSet = Bulkan.VkDescriptorSet;
+    private typealias VkSampler = Bulkan.VkSampler;
+    private typealias VkImageView = Bulkan.VkImageView;
+    private typealias VkImageLayout = Bulkan.VkImageLayout;
+    private typealias VkCommandBuffer = Bulkan.VkCommandBuffer;
+    private typealias VkPipeline = Bulkan.VkPipeline;
+
+    [CRepr]
+    public struct InitInfo
+    {
+        public Bulkan.VkInstance                       Instance;
+        public Bulkan.VkPhysicalDevice                 PhysicalDevice;
+        public Bulkan.VkDevice                         Device;
+        public uint32                                  QueueFamily;
+        public Bulkan.VkQueue                          Queue;
+        public Bulkan.VkDescriptorPool                 DescriptorPool;
+        public Bulkan.VkRenderPass                     RenderPass;
+        public uint32                                  MinImageCount;
+        public uint32                                  ImageCount;
+        public Bulkan.VkSampleCountFlags               MSAASamples;
+        public Bulkan.VkPipelineCache                  PipelineCache;
+        public uint32                                  Subpass;
+        public uint32                                  DescriptorPoolSize;
+        public bool                                    UseDynamicRendering;
+        public Bulkan.VkPipelineRenderingCreateInfo    PipelineRenderingCreateInfo;
+        public Bulkan.VkAllocationCallbacks*           Allocator;
+        public function void(Bulkan.VkResult)          CheckVkResultFn;
+        public Bulkan.VkDeviceSize                     MinAllocationSize;
+    }
+";
+            }
             else if (Name.StartsWith("ImGuiImplOpenGL"))
             {
                 serialized +=

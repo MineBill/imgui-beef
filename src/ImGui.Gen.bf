@@ -1,9 +1,9 @@
 // -- GENERATION INFORMATION --
-// Date: 1/26/2025 10:17:58 AM
+// Date: 2/19/2025 7:15:14 PM
 // Constructors: 104
 // Destructors: 83
 // Enums: 81
-// Global methods: 941
+// Global methods: 945
 // Instance methods: 374
 // Structs: 122
 // Typedefs: 31
@@ -12,8 +12,8 @@ using System;
 namespace ImGui;
 public static class ImGui
 {
-    public static char8* VERSION = "1.91.7";
-    public static int VERSION_NUM = 191700;
+    public static char8* VERSION = "1.91.8";
+    public static int VERSION_NUM = 191800;
     public static bool CHECKVERSION()
     {
         bool result = DebugCheckVersionAndDataLayout(VERSION, sizeof(IO), sizeof(Style), sizeof(Vec2), sizeof(Vec4), sizeof(DrawVert), sizeof(DrawIdx));
@@ -372,9 +372,10 @@ public enum ColorEditFlags : int32
     NoSidePreview = 256,
     NoDragDrop = 512,
     NoBorder = 1024,
+    AlphaOpaque = 2048,
+    AlphaNoBg = 4096,
+    AlphaPreviewHalf = 8192,
     AlphaBar = 65536,
-    AlphaPreview = 131072,
-    AlphaPreviewHalf = 262144,
     HDR = 524288,
     DisplayRGB = 1048576,
     DisplayHSV = 2097152,
@@ -386,6 +387,7 @@ public enum ColorEditFlags : int32
     InputRGB = 134217728,
     InputHSV = 268435456,
     DefaultOptions_ = 177209344,
+    AlphaMask_ = 14338,
     DisplayMask_ = 7340032,
     DataTypeMask_ = 25165824,
     PickerMask_ = 100663296,
@@ -1376,7 +1378,8 @@ public enum TabItemFlagsPrivate : int32
     TabItemFlags_SectionMask_ = 192,
     TabItemFlags_NoCloseButton = 1048576,
     TabItemFlags_Button = 2097152,
-    TabItemFlags_Unsorted = 4194304,
+    TabItemFlags_Invisible = 4194304,
+    TabItemFlags_Unsorted = 8388608,
 
 }
 
@@ -1613,12 +1616,12 @@ public enum WindowFlags : int32
     NoNav = 196608,
     NoDecoration = 43,
     NoInputs = 197120,
+    DockNodeHost = 8388608,
     ChildWindow = 16777216,
     Tooltip = 33554432,
     Popup = 67108864,
     Modal = 134217728,
     ChildMenu = 268435456,
-    DockNodeHost = 536870912,
 
 }
 
@@ -2205,7 +2208,7 @@ public struct Font
     public Vector<float> IndexAdvanceX;
     public float FallbackAdvanceX;
     public float FontSize;
-    public Vector<Wchar> IndexLookup;
+    public Vector<U16> IndexLookup;
     public Vector<FontGlyph> Glyphs;
     public FontGlyph* FallbackGlyph;
     public FontAtlas* ContainerAtlas;
@@ -2216,12 +2219,12 @@ public struct Font
     public Wchar FallbackChar;
     public float EllipsisWidth;
     public float EllipsisCharStep;
-    public bool DirtyLookupTables;
     public float Scale;
     public float Ascent;
     public float Descent;
     public int32 MetricsTotalSurface;
-    public U8[2] Used4kPagesMap;
+    public bool DirtyLookupTables;
+    public U8[1] Used8kPagesMap;
 
     [LinkName("ImFont_ImFont")]
     private static extern Font* CtorImpl();
@@ -2309,8 +2312,8 @@ public struct FontAtlas
     public TextureID TexID;
     public int32 TexDesiredWidth;
     public int32 TexGlyphPadding;
-    public bool Locked;
     public void* UserData;
+    public bool Locked;
     public bool TexReady;
     public bool TexPixelsUseColors;
     public uchar* TexPixelsAlpha8;
@@ -2322,7 +2325,7 @@ public struct FontAtlas
     public Vector<Font*> Fonts;
     public Vector<FontAtlasCustomRect> CustomRects;
     public Vector<FontConfig> ConfigData;
-    public Vec4[64] TexUvLines;
+    public Vec4[33] TexUvLines;
     public FontBuilderIO* FontBuilderIO;
     public uint32 FontBuilderFlags;
     public int32 PackIdMouseCursors;
@@ -2517,17 +2520,17 @@ public struct FontConfig
     public void* FontData;
     public int32 FontDataSize;
     public bool FontDataOwnedByAtlas;
+    public bool MergeMode;
+    public bool PixelSnapH;
     public int32 FontNo;
-    public float SizePixels;
     public int32 OversampleH;
     public int32 OversampleV;
-    public bool PixelSnapH;
+    public float SizePixels;
     public Vec2 GlyphExtraSpacing;
     public Vec2 GlyphOffset;
     public Wchar* GlyphRanges;
     public float GlyphMinAdvanceX;
     public float GlyphMaxAdvanceX;
-    public bool MergeMode;
     public uint32 FontBuilderFlags;
     public float RasterizerMultiply;
     public float RasterizerDensity;
@@ -3381,6 +3384,7 @@ public struct IO
     public U16[5] MouseClickedCount;
     public U16[5] MouseClickedLastCount;
     public bool[5] MouseReleased;
+    public double[5] MouseReleasedTime;
     public bool[5] MouseDownOwned;
     public bool[5] MouseDownOwnedUnlessPopupClose;
     public bool MouseWheelRequestAxisSwap;
@@ -4903,6 +4907,7 @@ public struct Table
     public TableDrawChannelIdx DummyDrawChannel;
     public TableDrawChannelIdx Bg2DrawChannelCurrent;
     public TableDrawChannelIdx Bg2DrawChannelUnfrozen;
+    public S8 NavLayer;
     public bool IsLayoutLocked;
     public bool IsInsideRow;
     public bool IsInitializing;
@@ -5570,7 +5575,9 @@ public struct Window
     public Storage StateStorage;
     public Vector<OldColumns> ColumnsStorage;
     public float FontWindowScale;
+    public float FontWindowScaleParents;
     public float FontDpiScale;
+    public float FontRefSize;
     public int32 SettingsOffset;
     public DrawList* DrawList;
     public DrawList DrawListInst;
@@ -5599,8 +5606,6 @@ public struct Window
     public DockNode* DockNode;
     public DockNode* DockNodeAsHost;
     public ID DockId;
-    public ItemStatusFlags DockTabItemStatusFlags;
-    public Rect DockTabItemRect;
 
     [LinkName("ImGuiWindow_ImGuiWindow")]
     private static extern Window* CtorImpl(Context* context, char* name);
@@ -5771,6 +5776,10 @@ public struct WindowTempData
     public LayoutType LayoutType;
     public LayoutType ParentLayoutType;
     public U32 ModalDimBgColor;
+    public ItemStatusFlags WindowItemStatusFlags;
+    public ItemStatusFlags ChildItemStatusFlags;
+    public ItemStatusFlags DockTabItemStatusFlags;
+    public Rect DockTabItemRect;
     public float ItemWidth;
     public float TextWrapPos;
     public Vector<float> ItemWidthStack;
@@ -8810,6 +8819,15 @@ private static extern void ImFontAtlasBuildFinishImpl(FontAtlas* atlas);
 public static void ImFontAtlasBuildFinish(FontAtlas* atlas) => ImFontAtlasBuildFinishImpl(atlas);
 
     
+[LinkName("igImFontAtlasBuildGetOversampleFactors")]
+private static extern void ImFontAtlasBuildGetOversampleFactorsImpl(FontConfig* cfg, int32* out_oversample_h, int32* out_oversample_v);
+public static void ImFontAtlasBuildGetOversampleFactors(FontConfig* cfg, out int32 out_oversample_h, out int32 out_oversample_v)
+{
+    out_oversample_h = ?;
+    out_oversample_v = ?;
+}
+
+    
 [LinkName("igImFontAtlasBuildInit")]
 private static extern void ImFontAtlasBuildInitImpl(FontAtlas* atlas);
 public static void ImFontAtlasBuildInit(FontAtlas* atlas) => ImFontAtlasBuildInitImpl(atlas);
@@ -9661,6 +9679,11 @@ private static extern bool IsMouseReleasedImpl(MouseButton button, ID owner_id);
 public static bool IsMouseReleased(MouseButton button, ID owner_id) => IsMouseReleasedImpl(button, owner_id);
 
     
+[LinkName("igIsMouseReleasedWithDelay")]
+private static extern bool IsMouseReleasedWithDelayImpl(MouseButton button, float delay);
+public static bool IsMouseReleasedWithDelay(MouseButton button, float delay) => IsMouseReleasedWithDelayImpl(button, delay);
+
+    
 [LinkName("igIsNamedKey")]
 private static extern bool IsNamedKeyImpl(Key key);
 public static bool IsNamedKey(Key key) => IsNamedKeyImpl(key);
@@ -10169,6 +10192,11 @@ private static extern void PushOverrideIDImpl(ID id);
 public static void PushOverrideID(ID id) => PushOverrideIDImpl(id);
 
     
+[LinkName("igPushPasswordFont")]
+private static extern void PushPasswordFontImpl();
+public static void PushPasswordFont() => PushPasswordFontImpl();
+
+    
 [LinkName("igPushStyleColor_U32")]
 private static extern void PushStyleColorImpl(Col idx, U32 col);
 public static void PushStyleColor(Col idx, U32 col) => PushStyleColorImpl(idx, col);
@@ -10539,8 +10567,8 @@ public static void SetKeyboardFocusHere(int32 offset = (int32) 0) => SetKeyboard
 
     
 [LinkName("igSetLastItemData")]
-private static extern void SetLastItemDataImpl(ID item_id, ItemFlags in_flags, ItemStatusFlags status_flags, Rect item_rect);
-public static void SetLastItemData(ID item_id, ItemFlags in_flags, ItemStatusFlags status_flags, Rect item_rect) => SetLastItemDataImpl(item_id, in_flags, status_flags, item_rect);
+private static extern void SetLastItemDataImpl(ID item_id, ItemFlags item_flags, ItemStatusFlags status_flags, Rect item_rect);
+public static void SetLastItemData(ID item_id, ItemFlags item_flags, ItemStatusFlags status_flags, Rect item_rect) => SetLastItemDataImpl(item_id, item_flags, status_flags, item_rect);
 
     
 [LinkName("igSetMouseCursor")]
@@ -11159,6 +11187,11 @@ public static void TabItemLabelAndCloseButton(DrawList* draw_list, Rect bb, TabI
     out_just_closed = ?;
     out_text_clipped = ?;
 }
+
+    
+[LinkName("igTabItemSpacing")]
+private static extern void TabItemSpacingImpl(char* str_id, TabItemFlags flags, float width);
+public static void TabItemSpacing(char* str_id, TabItemFlags flags, float width) => TabItemSpacingImpl(str_id, flags, width);
 
     
 [LinkName("igTableAngledHeadersRow")]
