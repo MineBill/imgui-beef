@@ -20,7 +20,7 @@ namespace ImGuiBeefGenerator
 		{
 			Console.WriteLine("Initializing");
 
-            const string basePath = "Generator/cimgui/generator/output";
+            const string basePath = "Native/cimgui/generator/output";
 
 			var structsAndEnums = ReadBindingData($"{basePath}/structs_and_enums.json");
 
